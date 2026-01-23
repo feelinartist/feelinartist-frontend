@@ -66,9 +66,9 @@ interface GalleryImage {
 
 interface PerfilArtista {
     urlPago?: string | null;
-    imagenQR?: string | null;
+    pagoQR?: string | null;
     nombreQR?: string | null;
-    codigoQR?: string | null;
+    musicQR?: string | null;
     galeria?: GalleryImage[];
 }
 
@@ -640,18 +640,18 @@ export default function PaginaGestionUsuarios() {
                             </div>
 
                             {/* QR Codes Section */}
-                            {((editingUser?.perfilArtista?.imagenQR && editingUser?.perfilArtista?.nombreQR) || editingUser?.perfilArtista?.codigoQR) && (
+                            {((editingUser?.perfilArtista?.pagoQR && editingUser?.perfilArtista?.nombreQR) || editingUser?.perfilArtista?.musicQR) && (
                                 <div className="space-y-3 pt-2">
                                     <div className="flex items-center gap-2 text-[11px] font-bold text-zinc-500 uppercase tracking-widest ml-1 italic">
                                         <QrCode className="h-3.5 w-3.5 text-indigo-400" />
                                         Donaciones y QR
                                     </div>
                                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                                        {/* Legacy Código QR */}
-                                        {editingUser.perfilArtista?.codigoQR && (
+                                        {/* Music QR (previously Código QR) */}
+                                        {editingUser.perfilArtista?.musicQR && (
                                             <div className="relative aspect-square rounded-xl overflow-hidden border border-white/10 bg-white p-1.5 group/qr-leg">
                                                 <Image
-                                                    src={editingUser.perfilArtista?.codigoQR || ""}
+                                                    src={editingUser.perfilArtista?.musicQR || ""}
                                                     fill
                                                     className="object-contain transition-transform duration-500 group-hover/qr-leg:scale-110"
                                                     alt="Legacy QR"
@@ -659,29 +659,29 @@ export default function PaginaGestionUsuarios() {
                                                 />
                                                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/qr-leg:opacity-100 transition-all duration-300 flex flex-col items-center justify-center gap-2">
                                                     <button
-                                                        onClick={() => window.open(editingUser.perfilArtista?.codigoQR || "", '_blank')}
+                                                        onClick={() => window.open(editingUser.perfilArtista?.musicQR || "", '_blank')}
                                                         className="p-1.5 bg-white/20 hover:bg-white/30 rounded-full text-white shadow-lg"
                                                     >
                                                         <ExternalLink className="h-3.5 w-3.5" />
                                                     </button>
                                                     <button
-                                                        onClick={() => handleDownload(editingUser.perfilArtista?.codigoQR || "", `qr_codigo_${editingUser.nombreUsuario}.png`)}
+                                                        onClick={() => handleDownload(editingUser.perfilArtista?.musicQR || "", `qr_music_${editingUser.nombreUsuario}.png`)}
                                                         className="p-1.5 bg-indigo-500 hover:bg-indigo-600 rounded-full text-white shadow-lg"
                                                     >
                                                         <Download className="h-3.5 w-3.5" />
                                                     </button>
                                                 </div>
                                                 <div className="absolute top-1 left-1">
-                                                    <Badge className="bg-zinc-800/80 text-[7px] h-3 px-1 border-none font-bold uppercase tracking-tighter">CÓDIGO QR</Badge>
+                                                    <Badge className="bg-zinc-800/80 text-[7px] h-3 px-1 border-none font-bold uppercase tracking-tighter">MUSIC QR</Badge>
                                                 </div>
                                             </div>
                                         )}
 
-                                        {/* New Imagen QR */}
-                                        {editingUser.perfilArtista?.imagenQR && editingUser.perfilArtista?.nombreQR && (
+                                        {/* Payment QR (previously Imagen QR) */}
+                                        {editingUser.perfilArtista?.pagoQR && editingUser.perfilArtista?.nombreQR && (
                                             <div className="relative aspect-square rounded-xl overflow-hidden border border-indigo-500/30 bg-white p-1.5 group/qr-img">
                                                 <Image
-                                                    src={editingUser.perfilArtista?.imagenQR || ""}
+                                                    src={editingUser.perfilArtista?.pagoQR || ""}
                                                     fill
                                                     className="object-contain transition-transform duration-500 group-hover/qr-img:scale-110"
                                                     alt="Image QR"
@@ -689,20 +689,20 @@ export default function PaginaGestionUsuarios() {
                                                 />
                                                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover/qr-img:opacity-100 transition-all duration-300 flex flex-col items-center justify-center gap-2">
                                                     <button
-                                                        onClick={() => window.open(editingUser.perfilArtista?.imagenQR || "", '_blank')}
+                                                        onClick={() => window.open(editingUser.perfilArtista?.pagoQR || "", '_blank')}
                                                         className="p-1.5 bg-white/20 hover:bg-white/30 rounded-full text-white shadow-lg"
                                                     >
                                                         <ExternalLink className="h-3.5 w-3.5" />
                                                     </button>
                                                     <button
-                                                        onClick={() => handleDownload(editingUser.perfilArtista?.imagenQR || "", `qr_imagen_${editingUser.nombreUsuario}.png`)}
+                                                        onClick={() => handleDownload(editingUser.perfilArtista?.pagoQR || "", `qr_payment_${editingUser.nombreUsuario}.png`)}
                                                         className="p-1.5 bg-indigo-500 hover:bg-indigo-600 rounded-full text-white shadow-lg"
                                                     >
                                                         <Download className="h-3.5 w-3.5" />
                                                     </button>
                                                 </div>
                                                 <div className="absolute top-1 left-1 flex flex-col gap-0.5">
-                                                    <Badge className="bg-indigo-600 text-[7px] h-3 px-1 border-none font-bold uppercase tracking-tighter w-fit">IMAGEN QR</Badge>
+                                                    <Badge className="bg-indigo-600 text-[7px] h-3 px-1 border-none font-bold uppercase tracking-tighter w-fit">PAGO QR</Badge>
                                                     <Badge className="bg-black/80 text-[6px] h-2.5 px-1 border-none font-medium truncate max-w-[50px]">{editingUser.perfilArtista?.nombreQR}</Badge>
                                                 </div>
                                             </div>

@@ -9,6 +9,14 @@ const nextConfig = {
             },
         ],
     },
+    async rewrites() {
+        return [
+            {
+                source: '/uploads/:path*',
+                destination: `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'}/uploads/:path*`,
+            },
+        ];
+    },
 };
 
 export default nextConfig;

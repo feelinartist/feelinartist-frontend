@@ -31,7 +31,7 @@ interface PerfilArtistaDonacion {
 
 interface PerfilArtista {
     urlPago?: string | null;
-    imagenQR?: string | null;
+    pagoQR?: string | null;
     nombreQR?: string | null;
 }
 
@@ -62,7 +62,7 @@ export function DonationForm({ metodosDonacion, perfilArtista, usuarioId, onSave
 
     // Global QR and URL (one per artist profile)
     const [urlPagoGlobal, setUrlPagoGlobal] = useState(perfilArtista?.urlPago || "");
-    const [imagenQRGlobal, setImagenQRGlobal] = useState(perfilArtista?.imagenQR || "");
+    const [pagoQRGlobal, setPagoQRGlobal] = useState(perfilArtista?.pagoQR || "");
     const [nombreQRGlobal, setNombreQRGlobal] = useState(perfilArtista?.nombreQR || "");
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -142,7 +142,7 @@ export function DonationForm({ metodosDonacion, perfilArtista, usuarioId, onSave
 
             // Convert to base64 for preview only
             const base64 = await convertToBase64(file);
-            setImagenQRGlobal(base64);
+            setPagoQRGlobal(base64);
 
             toast.dismiss();
             toast.success("QR cargado. Haz click en 'Guardar Cambios' para subirlo.");
@@ -157,7 +157,7 @@ export function DonationForm({ metodosDonacion, perfilArtista, usuarioId, onSave
     };
 
     const handleRemoveQR = () => {
-        setImagenQRGlobal("");
+        setPagoQRGlobal("");
         toast.success("QR eliminado");
     };
 
@@ -169,7 +169,7 @@ export function DonationForm({ metodosDonacion, perfilArtista, usuarioId, onSave
 
         // Validation: QR Name and Image must exist together
         const hasQRName = !!nombreQRGlobal.trim();
-        const hasQRImage = !!imagenQRGlobal;
+        const hasQRImage = !!pagoQRGlobal;
 
         if (hasQRName !== hasQRImage) {
             toast.error(hasQRName
@@ -189,18 +189,18 @@ export function DonationForm({ metodosDonacion, perfilArtista, usuarioId, onSave
         }
 
         try {
-            let finalQRUrl = imagenQRGlobal;
+            let finalQRUrl = pagoQRGlobal;
 
-            // Upload QR to Cloudinary if it's a new base64 image
-            if (imagenQRGlobal && imagenQRGlobal.startsWith('data:')) {
-                const loadingToast = toast.loading("Subiendo QR a Cloudinary...");
+            // Upload QR to Cloudinary (or Local) if it's a new base64 image
+            if (pagoQRGlobal && pagoQRGlobal.startsWith('data:')) {
+                const loadingToast = toast.loading("Subiendo QR...");
 
                 const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'}/api/imagenes/qr-pago`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         usuarioId,
-                        image: imagenQRGlobal
+                        image: pagoQRGlobal
                     })
                 });
 
@@ -211,9 +211,9 @@ export function DonationForm({ metodosDonacion, perfilArtista, usuarioId, onSave
                 const data = await response.json();
                 finalQRUrl = data.url;
                 toast.dismiss(loadingToast);
-            } else if (imagenQRGlobal) {
-                // It's already a URL from Cloudinary
-                finalQRUrl = imagenQRGlobal;
+            } else if (pagoQRGlobal) {
+                // It's already a URL
+                finalQRUrl = pagoQRGlobal;
             }
 
             const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'}/api/usuarios/perfil`, {
@@ -226,7 +226,7 @@ export function DonationForm({ metodosDonacion, perfilArtista, usuarioId, onSave
                         numeroCuenta: d.numeroCuenta
                     })),
                     urlPago: urlPagoGlobal,
-                    imagenQR: finalQRUrl,
+                    pagoQR: finalQRUrl,
                     nombreQR: nombreQRGlobal
                 }),
             });
@@ -370,10 +370,10 @@ export function DonationForm({ metodosDonacion, perfilArtista, usuarioId, onSave
                         {/* QR Code */}
                         <div className="space-y-2">
                             <Label className="text-zinc-300">Código QR (Opcional)</Label>
-                            {imagenQRGlobal ? (
+                            {pagoQRGlobal ? (
                                 <div className="relative w-32 h-32 rounded-lg overflow-hidden bg-zinc-900 border border-zinc-800 group">
                                     <Image
-                                        src={imagenQRGlobal}
+                                        src={pagoQRGlobal}
                                         alt="QR Code"
                                         width={128}
                                         height={128}

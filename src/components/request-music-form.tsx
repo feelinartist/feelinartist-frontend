@@ -9,8 +9,8 @@ import Image from "next/image";
 import { toast } from "sonner";
 
 interface ArtistProfile {
-    imagenQR?: string | null;
-    codigoQR?: string | null;
+    pagoQR?: string | null;
+    musicQR?: string | null;
     nombreQR?: string | null;
     urlPago?: string | null;
     metodosDonacion?: Array<{

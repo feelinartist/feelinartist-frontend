@@ -58,7 +58,8 @@ interface PublicUser {
         categoria?: string;
         lugaresConocidos?: string[];
         urlPago?: string | null;
-        imagenQR?: string | null;
+        pagoQR?: string | null;
+        musicQR?: string | null;
         nombreQR?: string | null;
         urlYoutubeFavorito?: string;
         urlSoundCloudFavorito?: string;
@@ -153,8 +154,8 @@ export default function PaginaPerfilArtistaPublico() {
         return `${diff} año${diff > 1 ? 's' : ''}`;
     };
 
-    // QR Logic: Show ONLY if both image and name exist
-    const showQR = perfil.imagenQR && perfil.nombreQR;
+    // QR Logic: Show ONLY if both image and name exist (Payment QR)
+    const showQR = perfil.pagoQR && perfil.nombreQR;
 
     return (
         <div className="relative min-h-[100dvh] bg-black text-white selection:bg-indigo-500/30 px-4 md:px-6 py-4 pt-20 overflow-x-hidden">
@@ -336,12 +337,12 @@ export default function PaginaPerfilArtistaPublico() {
                                 {showQR ? (
                                     <div className="space-y-3">
                                         <div
-                                            onClick={() => setImagenZoom(perfil.imagenQR!)}
+                                            onClick={() => setImagenZoom(perfil.pagoQR!)}
                                             className="bg-white p-3 rounded-2xl shadow-lg transform rotate-1 hover:rotate-0 transition-transform duration-300 mx-auto w-fit cursor-pointer group"
                                         >
                                             <div className="relative aspect-square w-32 bg-zinc-100 rounded-xl overflow-hidden mb-2">
                                                 <Image
-                                                    src={perfil.imagenQR!}
+                                                    src={perfil.pagoQR!}
                                                     alt={perfil.nombreQR!}
                                                     fill
                                                     className="object-cover"
