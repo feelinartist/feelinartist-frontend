@@ -366,7 +366,9 @@ export default function ArtistRegistrationPage() {
                                 placeholder="Cuéntanos un poco sobre ti..."
                                 value={formData.biografia}
                                 onChange={handleChange}
-                                className="bg-zinc-900/50 border-zinc-800 focus:border-[#0055FF] text-white min-h-[120px] rounded-xl px-4 py-3 text-sm placeholder:text-zinc-600 resize-none"
+                                spellCheck={true}
+                                lang="es"
+                                className="bg-zinc-900/50 border-zinc-800 focus:border-[#0055FF] text-white min-h-[120px] rounded-xl px-4 py-3 text-sm placeholder:text-zinc-600 resize-none relative z-20"
                             />
                         </div>
 

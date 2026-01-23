@@ -35,7 +35,7 @@ import {
     AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-type CategoriaConfig = "CLOUDINARY" | "SPOTIFY" | "GENERAL" | "EMAIL" | "PAYMENT";
+type CategoriaConfig = "SPOTIFY" | "GENERAL" | "EMAIL" | "PAYMENT";
 
 interface ConfigSistema {
     id: string;
@@ -115,7 +115,6 @@ export default function ConfigSistemaPage() {
 
     const inferCategory = (clave: string): CategoriaConfig => {
         const key = clave.toUpperCase();
-        if (key.startsWith("CLOUDINARY_")) return "CLOUDINARY";
         if (key.startsWith("SPOTIFY_")) return "SPOTIFY";
         if (key.startsWith("STRIPE_") || key.startsWith("MERCADOPAGO_") || key.startsWith("PAYPAL_")) return "PAYMENT";
         if (key.startsWith("SMTP_") || key.startsWith("EMAIL_") || key.startsWith("RESEND_")) return "EMAIL";
@@ -247,14 +246,12 @@ export default function ConfigSistemaPage() {
                                 <div className="space-y-4 py-4">
                                     {!editingConfig && (
                                         <>
-
-
                                             <div className="space-y-2">
                                                 <Label>Clave</Label>
                                                 <Input
                                                     value={formData.clave}
                                                     onChange={(e) => setFormData({ ...formData, clave: e.target.value })}
-                                                    placeholder="CLOUDINARY_API_KEY"
+                                                    placeholder="SPOTIFY_CLIENT_ID"
                                                     className="bg-zinc-800 border-zinc-700 text-white"
                                                     required
                                                 />

@@ -124,9 +124,9 @@ export function GalleryForm({ galeria, usuarioId, onSave, onLoadingChange }: Gal
 
             let uploadedUrls = [...existingUrls];
 
-            // Upload new images to Cloudinary if any
+            // Upload new images if any
             if (newBase64Images.length > 0) {
-                const loadingToast = toast.loading(`Subiendo ${newBase64Images.length} imagen(es) a Cloudinary...`);
+                const loadingToast = toast.loading(`Subiendo ${newBase64Images.length} imagen(es)...`);
 
                 const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'}/api/imagenes/galeria`, {
                     method: 'POST',

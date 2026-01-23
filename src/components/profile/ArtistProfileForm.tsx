@@ -381,6 +381,8 @@ export function ArtistProfileForm({ userData, onSubmit, countries, timezones, is
                         name="biografia"
                         value={formData.biografia}
                         onChange={handleChange}
+                        spellCheck={true}
+                        lang="es"
                         className="bg-zinc-900/50 border-zinc-800 focus:border-[#0055FF] text-white min-h-[120px] rounded-xl px-4 py-3 text-sm resize-none"
                         placeholder="Cuéntanos un poco sobre ti..."
                     />

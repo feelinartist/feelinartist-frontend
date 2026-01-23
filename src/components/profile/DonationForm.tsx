@@ -191,7 +191,7 @@ export function DonationForm({ metodosDonacion, perfilArtista, usuarioId, onSave
         try {
             let finalQRUrl = pagoQRGlobal;
 
-            // Upload QR to Cloudinary (or Local) if it's a new base64 image
+            // Upload QR if it's a new base64 image
             if (pagoQRGlobal && pagoQRGlobal.startsWith('data:')) {
                 const loadingToast = toast.loading("Subiendo QR...");
 
