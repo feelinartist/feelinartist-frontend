@@ -34,7 +34,7 @@ export default function PaginaAdmin() {
     const adminSections = [
         {
             title: "Configuración del Sistema",
-            description: "Gestiona las variables de entorno y credenciales de servicios (Spotify, etc.).",
+            description: "Gestiona las variables de entorno y credenciales de servicios.",
             icon: <Settings className="h-6 w-6 text-purple-500" />,
             href: "/admin/config-sistema",
             color: "from-purple-500/20 to-violet-500/20"

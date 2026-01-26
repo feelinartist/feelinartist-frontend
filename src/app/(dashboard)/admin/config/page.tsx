@@ -237,7 +237,7 @@ export default function PaginaConfiguracionAdmin() {
         if (type.includes('youtube')) return <Youtube className="h-5 w-5" />;
         if (type.includes('tiktok')) return <Music className="h-5 w-5" />;
         if (type.includes('whatsapp')) return <MessageSquare className="h-5 w-5" />;
-        if (type.includes('spotify') || type.includes('soundcloud')) return <Music className="h-5 w-5" />;
+        if (type.includes('soundcloud')) return <Music className="h-5 w-5" />;
         return <Globe className="h-5 w-5" />;
     };
 

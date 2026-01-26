@@ -360,7 +360,7 @@ export default function PaginaPerfilArtistaPublico() {
                                         <button
                                             onClick={async () => {
                                                 try {
-                                                    const response = await fetch(perfil.imagenQR!);
+                                                    const response = await fetch(perfil.pagoQR!);
                                                     const blob = await response.blob();
                                                     const url = window.URL.createObjectURL(blob);
                                                     const a = document.createElement('a');

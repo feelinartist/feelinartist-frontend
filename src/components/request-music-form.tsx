@@ -25,11 +25,15 @@ interface ArtistProfile {
 
 interface Track {
     id: string;
+    itunesId: string;
     name: string;
     album: {
         images: Array<{ url: string }>;
     };
     artists: Array<{ name: string }>;
+    genre?: string;
+    previewUrl?: string;
+    artworkUrlHighRes?: string;
 }
 
 interface RequestMusicFormProps {
@@ -43,25 +47,58 @@ export function RequestMusicForm({ eventoId, artistName, artistProfile }: Reques
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
 
-    console.log("DEBUG: artistProfile received:", artistProfile);
-
     // Search & Selection State
     const [query, setQuery] = useState("");
     const [results, setResults] = useState<Track[]>([]);
     const [isSearching, setIsSearching] = useState(false);
     const [selectedTrack, setSelectedTrack] = useState<Track | null>(null);
     const [yourName, setYourName] = useState("");
+
     // Debounce Search
     useEffect(() => {
         const timer = setTimeout(async () => {
             if (query.trim().length > 2 && !selectedTrack) {
                 setIsSearching(true);
                 try {
-                    const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/music/search?q=${encodeURIComponent(query)}`);
-                    if (res.ok) {
-                        const data = await res.json();
-                        setResults(data.tracks?.items || []);
+                    // iTunes Client-Side Search
+                    const response = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&entity=song&limit=6`);
+
+                    if (!response.ok) {
+                        if (response.status === 403 || response.status === 429) {
+                            toast.error("Muchas búsquedas recientes. Espera unos segundos.");
+                        }
+                        setResults([]);
+                        return;
                     }
+
+                    const data = await response.json();
+
+                    if (data.results) {
+                        const mappedTracks: Track[] = data.results.map((item: any) => {
+                            // High Res Image Trick: Replace 100x100 with 600x600 for better quality
+                            const highResImage = item.artworkUrl100?.replace('100x100', '600x600');
+
+                            return {
+                                id: String(item.trackId), // Internal ID for key
+                                itunesId: String(item.trackId),
+                                name: item.trackName,
+                                artists: [{ name: item.artistName }],
+                                album: {
+                                    images: [
+                                        { url: item.artworkUrl100 }, // Standard (used for thumbnail)
+                                        { url: highResImage } // High Res
+                                    ]
+                                },
+                                genre: item.primaryGenreName,
+                                previewUrl: item.previewUrl,
+                                artworkUrlHighRes: highResImage
+                            };
+                        });
+                        setResults(mappedTracks);
+                    } else {
+                        setResults([]);
+                    }
+
                 } catch (error) {
                     console.error("Search error", error);
                 } finally {
@@ -70,7 +107,7 @@ export function RequestMusicForm({ eventoId, artistName, artistProfile }: Reques
             } else {
                 setResults([]);
             }
-        }, 500);
+        }, 600); // Slightly increased debounce for iTunes
 
         return () => clearTimeout(timer);
     }, [query, selectedTrack]);
@@ -104,9 +141,12 @@ export function RequestMusicForm({ eventoId, artistName, artistProfile }: Reques
                     eventoId,
                     titulo: selectedTrack.name,
                     artista: selectedTrack.artists[0].name,
-                    spotifyId: selectedTrack.id,
+                    itunesId: selectedTrack.itunesId,
                     nombreSolicitante: yourName,
-                    usuarioId: null // Public request
+                    usuarioId: null, // Public request
+                    genero: selectedTrack.genre,
+                    imagenUrl: selectedTrack.artworkUrlHighRes || selectedTrack.album.images[0].url,
+                    previewUrl: selectedTrack.previewUrl
                 })
             });
 
@@ -140,7 +180,7 @@ export function RequestMusicForm({ eventoId, artistName, artistProfile }: Reques
 
                 {/* Donation and Social Section */}
                 {(() => {
-                    const qrImage = artistProfile?.imagenQR || artistProfile?.codigoQR;
+                    const qrImage = artistProfile?.pagoQR || artistProfile?.musicQR; // Fallback logic adjust if needed
                     const hasDonationMethods = artistProfile?.metodosDonacion && artistProfile.metodosDonacion.length > 0;
                     const hasSocialMedia = artistProfile?.redesSociales && artistProfile.redesSociales.length > 0;
                     const hasDonationOptions = (qrImage && artistProfile?.nombreQR) || artistProfile?.urlPago || hasDonationMethods;
@@ -308,7 +348,7 @@ export function RequestMusicForm({ eventoId, artistName, artistProfile }: Reques
                                         className="p-3 hover:bg-white/5 cursor-pointer flex items-center gap-3 transition-colors border-b border-white/5 last:border-0"
                                     >
                                         <Image
-                                            src={track.album.images[2]?.url || track.album.images[0]?.url}
+                                            src={track.album.images[0]?.url}
                                             alt={track.name}
                                             width={40}
                                             height={40}
@@ -318,6 +358,7 @@ export function RequestMusicForm({ eventoId, artistName, artistProfile }: Reques
                                         <div className="flex-1 min-w-0">
                                             <p className="text-sm font-medium text-white truncate">{track.name}</p>
                                             <p className="text-xs text-zinc-400 truncate">{track.artists[0].name}</p>
+                                            {track.genre && <span className="text-[10px] text-indigo-300 bg-indigo-500/10 px-1.5 py-0.5 rounded border border-indigo-500/20 mt-1 inline-block">{track.genre}</span>}
                                         </div>
                                     </div>
                                 ))}
@@ -337,6 +378,9 @@ export function RequestMusicForm({ eventoId, artistName, artistProfile }: Reques
                         <div className="flex-1">
                             <p className="text-sm font-bold text-white leading-tight">{selectedTrack.name}</p>
                             <p className="text-xs text-indigo-200">{selectedTrack.artists[0].name}</p>
+                            {selectedTrack.genre && (
+                                <p className="text-[10px] text-zinc-400 mt-0.5">{selectedTrack.genre}</p>
+                            )}
                         </div>
                         <Button
                             type="button"

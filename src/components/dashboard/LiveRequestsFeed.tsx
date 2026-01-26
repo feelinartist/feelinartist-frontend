@@ -16,17 +16,17 @@ interface Request {
     artista?: string;
     estado: "PENDIENTE" | "ACEPTADO" | "RECHAZADO";
     creadoEn: string;
-    spotifyId?: string;
+    itunesId?: string;
 }
 
 interface GroupedRequest {
-    groupId: string; // Identifier for the group (spotifyId or title)
+    groupId: string; // Identifier for the group (itunesId or title)
     titulo: string;
     artista: string;
     count: number;
     solicitantes: string[];
     requestIds: string[];
-    spotifyId?: string;
+    itunesId?: string;
 }
 
 export function LiveRequestsFeed({ eventoId }: { eventoId: string }) {
@@ -75,8 +75,8 @@ export function LiveRequestsFeed({ eventoId }: { eventoId: string }) {
         const groups: Record<string, GroupedRequest> = {};
 
         pending.forEach(req => {
-            // Key: Prefer spotifyId, fallback to Title+Artist string
-            const key = req.spotifyId || `${req.titulo}-${req.artista || 'unknown'}`.toLowerCase();
+            // Key: Prefer itunesId, fallback to Title+Artist string
+            const key = req.itunesId || `${req.titulo}-${req.artista || 'unknown'}`.toLowerCase();
 
             if (!groups[key]) {
                 groups[key] = {
@@ -86,7 +86,7 @@ export function LiveRequestsFeed({ eventoId }: { eventoId: string }) {
                     count: 0,
                     solicitantes: [],
                     requestIds: [],
-                    spotifyId: req.spotifyId
+                    itunesId: req.itunesId
                 };
             }
 

@@ -114,7 +114,7 @@ export function SocialMediaForm({ redesSociales, usuarioId, onSave, onLoadingCha
         if (name.includes('twitter') || name.includes('x')) return "tuusuario";
         if (name.includes('tiktok')) return "tuusuario";
         if (name.includes('youtube')) return "tucanal";
-        if (name.includes('spotify')) return "tuartista";
+
         if (name.includes('soundcloud')) return "tuusuario";
         if (name.includes('twitch')) return "tucanal";
         if (name.includes('kick')) return "tucanal";
@@ -144,7 +144,7 @@ export function SocialMediaForm({ redesSociales, usuarioId, onSave, onLoadingCha
         if (name.includes('facebook')) return <Facebook className="h-4 w-4 text-blue-600" />;
         if (name.includes('youtube')) return <Youtube className="h-4 w-4 text-red-600" />;
         if (name.includes('whatsapp')) return <MessageSquare className="h-4 w-4 text-green-500" />;
-        if (name.includes('spotify') || name.includes('soundcloud')) return <Music className="h-4 w-4 text-green-400" />;
+        if (name.includes('soundcloud')) return <Music className="h-4 w-4 text-green-400" />;
         if (name.includes('kick')) return <Globe className="h-4 w-4 text-green-400" />;
         return <Globe className="h-4 w-4 text-zinc-400" />;
     };
