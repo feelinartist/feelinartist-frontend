@@ -149,8 +149,12 @@ export default function PaginaPerfilArtistaPublico() {
         if (!perfil.fechaInicio) return "N/A";
         const start = new Date(perfil.fechaInicio);
         const now = new Date();
-        const diff = now.getFullYear() - start.getFullYear();
-        if (diff === 0) return "Menos de 1 año";
+        let diff = now.getFullYear() - start.getFullYear();
+        const m = now.getMonth() - start.getMonth();
+        if (m < 0 || (m === 0 && now.getDate() < start.getDate())) {
+            diff--;
+        }
+        if (diff <= 0) return "Menos de 1 año";
         return `${diff} año${diff > 1 ? 's' : ''}`;
     };
 
@@ -446,7 +450,7 @@ export default function PaginaPerfilArtistaPublico() {
                                         <QRCode
                                             size={256}
                                             style={{ height: "auto", maxWidth: "100%", width: "100%" }}
-                                            value={`${typeof window !== 'undefined' ? window.location.href : ''}?mode=request`}
+                                            value={`${typeof window !== 'undefined' ? window.location.href.split('?')[0] : ''}/music`}
                                             viewBox={`0 0 256 256`}
                                         />
                                     </div>
@@ -547,7 +551,7 @@ export default function PaginaPerfilArtistaPublico() {
                                                                 }
                                                             } else {
                                                                 // Fallback: copy link to clipboard
-                                                                const shareUrl = typeof window !== 'undefined' ? `${window.location.href}?mode=request` : '';
+                                                                const shareUrl = typeof window !== 'undefined' ? `${window.location.href.split('?')[0]}/music` : '';
                                                                 await navigator.clipboard.writeText(shareUrl);
                                                                 toast.success('Enlace copiado al portapapeles');
                                                             }

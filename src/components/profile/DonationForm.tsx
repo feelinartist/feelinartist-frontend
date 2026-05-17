@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Loader2, Plus, Trash2, Upload, X, Save } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
+import { fetchApi } from "@/lib/api";
 import {
     Select,
     SelectContent,
@@ -79,7 +80,7 @@ export function DonationForm({ metodosDonacion, perfilArtista, usuarioId, onSave
 
     const fetchAvailableMethods = async () => {
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'}/api/config/metodos-donacion`);
+            const res = await fetchApi('/api/config/metodos-donacion');
             if (res.ok) {
                 const data = await res.json();
                 setAvailableMethods(data);
@@ -195,9 +196,8 @@ export function DonationForm({ metodosDonacion, perfilArtista, usuarioId, onSave
             if (pagoQRGlobal && pagoQRGlobal.startsWith('data:')) {
                 const loadingToast = toast.loading("Subiendo QR...");
 
-                const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'}/api/imagenes/qr-pago`, {
+                const response = await fetchApi('/api/imagenes/qr-pago', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         usuarioId,
                         image: pagoQRGlobal
@@ -216,9 +216,8 @@ export function DonationForm({ metodosDonacion, perfilArtista, usuarioId, onSave
                 finalQRUrl = pagoQRGlobal;
             }
 
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'}/api/usuarios/perfil`, {
+            const response = await fetchApi('/api/usuarios/perfil', {
                 method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     usuarioId,
                     metodosDonacion: donations.filter(d => d.metodoDonacionId && d.numeroCuenta).map((d) => ({

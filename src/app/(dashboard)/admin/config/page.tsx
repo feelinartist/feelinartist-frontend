@@ -89,7 +89,7 @@ export default function PaginaConfiguracionAdmin() {
             cargarDatos();
         }
 
-    }, [session]);
+    }, [session?.user?.rol]);
 
     const cargarDatos = async () => {
         setCargando(true);

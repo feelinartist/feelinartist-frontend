@@ -8,8 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Calendar, Play, Square, QrCode, Clock, MapPin, Loader2 } from "lucide-react";
+import { Clock, MapPin, Loader2, Calendar, Play, Square, QrCode } from "lucide-react";
 import { toast } from "sonner";
+import { fetchApi } from "@/lib/api";
 
 interface Evento {
     id: string;
@@ -41,7 +42,7 @@ export function EventManager({ onEventChange }: EventManagerProps) {
             if (!artistaId) return;
 
             // Fetch Active Event
-            const resEvent = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/eventos/activo/${artistaId}`, { cache: "no-store" });
+            const resEvent = await fetchApi(`/api/eventos/activo/${artistaId}`, { cache: "no-store" });
             if (resEvent.ok) {
                 const data = await resEvent.json();
                 setActiveEvent(data);
@@ -49,7 +50,7 @@ export function EventManager({ onEventChange }: EventManagerProps) {
 
             // Fetch Profile (QR Status & Timezone)
             if (session?.user?.id) {
-                const resProfile = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/usuarios/perfil/${session.user.id}`, { cache: "no-store" });
+                const resProfile = await fetchApi(`/api/usuarios/perfil/${session.user.id}`, { cache: "no-store" });
                 if (resProfile.ok) {
                     const profileData = await resProfile.json();
                     setPedidosActivos(profileData.perfilArtista?.pedidosActivos || false);
@@ -73,7 +74,7 @@ export function EventManager({ onEventChange }: EventManagerProps) {
         if (session?.user) {
             fetchState();
         }
-    }, [session, fetchState]);
+    }, [session?.user?.id, fetchState]);
 
     const handleGetLocation = () => {
         setLoadingLocation(true);
@@ -112,9 +113,8 @@ export function EventManager({ onEventChange }: EventManagerProps) {
         }
 
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/eventos`, {
+            const res = await fetchApi('/api/eventos', {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     artistaId,
                     titulo: title,
@@ -143,7 +143,7 @@ export function EventManager({ onEventChange }: EventManagerProps) {
         if (!activeEvent) return;
 
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/eventos/${activeEvent.id}/finalizar`, {
+            const res = await fetchApi(`/api/eventos/${activeEvent.id}/finalizar`, {
                 method: "PATCH"
             });
 
@@ -169,9 +169,8 @@ export function EventManager({ onEventChange }: EventManagerProps) {
         }
 
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/usuarios/perfil/pedidos`, {
+            const res = await fetchApi('/api/usuarios/perfil/pedidos', {
                 method: "PATCH",
-                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     artistaId,
                     activo: checked

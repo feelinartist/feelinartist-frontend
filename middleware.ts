@@ -2,6 +2,9 @@ import { getToken } from "next-auth/jwt";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
+// Roles that don't require profile registration — they go straight to Home
+const ADMIN_ROLES = ["SUPER_ADMIN", "ADMIN"];
+
 export async function middleware(req: NextRequest) {
     const token = await getToken({ req });
     const isAuth = !!token;
@@ -10,22 +13,34 @@ export async function middleware(req: NextRequest) {
         req.nextUrl.pathname.startsWith("/artist-registration") ||
         req.nextUrl.pathname.startsWith("/public-registration") ||
         req.nextUrl.pathname.startsWith("/venue-registration");
-    const isDashboardPage = req.nextUrl.pathname.startsWith("/dashboard");
+    const isDashboardPage = req.nextUrl.pathname === "/" ||
+        req.nextUrl.pathname.startsWith("/dashboard") ||
+        req.nextUrl.pathname.startsWith("/home") ||
+        req.nextUrl.pathname.startsWith("/events") ||
+        req.nextUrl.pathname.startsWith("/profile") ||
+        req.nextUrl.pathname.startsWith("/settings") ||
+        req.nextUrl.pathname.startsWith("/stats") ||
+        req.nextUrl.pathname.startsWith("/search") ||
+        req.nextUrl.pathname.startsWith("/admin");
 
     if (isAuth) {
-        // If user has a role, they shouldn't be on role selection or registration pages
-        if (token.rol) {
+        const userRol = token.rol as string | undefined;
+
+        if (userRol) {
+            // User HAS a role — they shouldn't be on role selection or registration pages
             if (isRolePage || isRegistrationPage) {
-                return NextResponse.redirect(new URL("/dashboard", req.url));
+                return NextResponse.redirect(new URL("/home", req.url));
             }
-        }
-        // If user has NO role, they MUST NOT be on the dashboard
-        else {
+        } else {
+            // User has NO role
+            // SUPER_ADMIN/ADMIN are pre-seeded with a role, so this path
+            // is only for regular users who haven't picked a role yet.
             if (isDashboardPage) {
                 return NextResponse.redirect(new URL("/role-selection", req.url));
             }
         }
     } else {
+        // Not authenticated — redirect to login for protected pages
         if (isRolePage || isRegistrationPage || isDashboardPage) {
             return NextResponse.redirect(new URL("/login", req.url));
         }
@@ -36,11 +51,30 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
     matcher: [
+        "/",
         "/dashboard",
         "/dashboard/:path*",
+        "/home",
+        "/home/:path*",
+        "/role-selection",
         "/role-selection/:path*",
+        "/artist-registration",
         "/artist-registration/:path*",
+        "/public-registration",
         "/public-registration/:path*",
+        "/venue-registration",
         "/venue-registration/:path*",
+        "/events",
+        "/events/:path*",
+        "/profile",
+        "/profile/:path*",
+        "/settings",
+        "/settings/:path*",
+        "/stats",
+        "/stats/:path*",
+        "/search",
+        "/search/:path*",
+        "/admin",
+        "/admin/:path*",
     ],
 };

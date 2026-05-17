@@ -45,6 +45,8 @@ declare module "next-auth" {
             name?: string | null
             image?: string | null
         } & DefaultSession["user"]
+        /** Backend JWT for authenticated API calls */
+        accessToken: string
     }
 
     interface User {
@@ -81,5 +83,7 @@ declare module "next-auth/jwt" {
         ultimoCambioNombreUsuario?: Date | string | null
         ultimoCambioNombre?: Date | string | null
         perfilCompletadoReconocido?: boolean
+        /** Backend JWT for authenticated API calls */
+        accessToken?: string
     }
 }

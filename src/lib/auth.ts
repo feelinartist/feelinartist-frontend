@@ -19,7 +19,7 @@ export function getAuthOptions(): NextAuthOptions {
                 clientSecret: googleClientSecret,
                 authorization: {
                     params: {
-                        prompt: "consent select_account",
+                        prompt: "select_account",
                         access_type: "offline",
                         response_type: "code"
                     }
@@ -40,13 +40,12 @@ export function getAuthOptions(): NextAuthOptions {
                     if (session.nombreArtistico) token.nombreArtistico = session.nombreArtistico;
                     if (session.name) token.name = session.name;
                     if (session.image) token.image = session.image;
+                    if (session.accessToken) token.accessToken = session.accessToken;
                     if (session.perfilCompletadoReconocido !== undefined) token.perfilCompletadoReconocido = session.perfilCompletadoReconocido;
                 }
 
                 if (account && user) {
                     try {
-                        console.log("Syncing user with backend at:", backendUrl);
-
                         const response = await fetch(`${backendUrl}/api/auth/login`, {
                             method: 'POST',
                             headers: {
@@ -59,23 +58,22 @@ export function getAuthOptions(): NextAuthOptions {
                             }),
                         });
 
-                        console.log("Backend response status:", response.status);
-
                         if (response.ok) {
                             const dbUser = await response.json();
-                            console.log("Backend user data:", JSON.stringify(dbUser, null, 2));
                             token.id = dbUser.id;
                             token.rol = dbUser.rol?.nombre;
                             token.name = dbUser.nombre || user.name;
                             token.image = dbUser.imagen || user.image;
                             token.perfilCompletadoReconocido = dbUser.perfilCompletadoReconocido || false;
+                            // Store the real backend JWT for API calls
+                            token.accessToken = dbUser.token;
                         } else {
                             console.error("Failed to sync user with backend. Status:", response.status);
-                            const errorText = await response.text();
-                            console.error("Error details:", errorText);
+                            throw new Error("Failed to authenticate with backend");
                         }
                     } catch (error) {
                         console.error("Error syncing user with backend:", error);
+                        throw new Error("Backend synchronization failed");
                     }
                 }
                 return token;
@@ -88,6 +86,8 @@ export function getAuthOptions(): NextAuthOptions {
                     session.user.image = token.image as string;
                     session.user.perfilCompletadoReconocido = token.perfilCompletadoReconocido as boolean;
                 }
+                // Expose the backend JWT to the client for API calls
+                session.accessToken = token.accessToken as string;
                 return session;
             },
         },

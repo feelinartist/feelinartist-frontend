@@ -116,7 +116,7 @@ export default function PaginaGestionUsuarios() {
         } else if (status === "authenticated") {
             router.push("/home");
         }
-    }, [status, session, router]);
+    }, [status, session?.user?.rol, router]);
 
     const cargarDatos = useCallback(async (page: number, term: string) => {
         setLoading(true);

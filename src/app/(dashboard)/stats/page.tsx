@@ -12,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { Music, TrendingUp, CheckCircle, XCircle, Award } from "lucide-react";
 import { toast } from "sonner";
+import { fetchApi } from "@/lib/api";
 
 interface EstadisticasArtista {
     perfilArtistaId: string;
@@ -70,7 +71,7 @@ export default function PaginaEstadisticas() {
             const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
 
             // 1. Get Profile
-            const perfilRes = await fetch(`${backendUrl}/api/usuarios/perfil/${session.user.id}`);
+            const perfilRes = await fetchApi(`/api/usuarios/perfil/${session.user.id}`);
             if (!perfilRes.ok) throw new Error("Error al obtener perfil");
             const perfil = await perfilRes.json();
 
@@ -84,8 +85,8 @@ export default function PaginaEstadisticas() {
 
             // 2. Load events and global stats in parallel
             const [eventosRes, statsRes] = await Promise.all([
-                fetch(`${backendUrl}/api/eventos/artista/${artistId}`),
-                fetch(`${backendUrl}/api/estadisticas/artista/${artistId}`)
+                fetchApi(`/api/eventos/artista/${artistId}`),
+                fetchApi(`/api/estadisticas/artista/${artistId}`)
             ]);
 
             if (eventosRes.ok) {

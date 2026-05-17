@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { fetchApi } from "@/lib/api";
 
 interface Evento {
     id: string;
@@ -34,7 +35,7 @@ export default function EventListPage() {
     const cargarEventos = useCallback(async () => {
         try {
             setCargando(true);
-            const perfilRes = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'}/api/usuarios/perfil/${session?.user?.id}`);
+            const perfilRes = await fetchApi(`/api/usuarios/perfil/${session?.user?.id}`);
             if (!perfilRes.ok) throw new Error("Error al obtener perfil");
             const perfil = await perfilRes.json();
 
@@ -46,7 +47,7 @@ export default function EventListPage() {
             });
             if (search) params.append('search', search);
 
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'}/api/eventos/artista/${perfil.perfilArtista.id}/paginated?${params}`);
+            const res = await fetchApi(`/api/eventos/artista/${perfil.perfilArtista.id}/paginated?${params}`);
             if (!res.ok) throw new Error("Error al cargar eventos");
 
             const data = await res.json();
@@ -63,7 +64,7 @@ export default function EventListPage() {
         if (session?.user) {
             cargarEventos();
         }
-    }, [session, cargarEventos]);
+    }, [session?.user?.id, cargarEventos]);
 
     if (cargando) return <LoadingScreen />;
 

@@ -1,5 +1,7 @@
 "use client";
 
+import { fetchApi } from "@/lib/api";
+
 import { useState, useEffect, useCallback } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { AnimatedBackground } from "@/components/animated-background";
@@ -72,6 +74,12 @@ export default function PaginaConfiguracion() {
     const [nuevoRol, setNuevoRol] = useState<string>("");
     const [datosMigracion, setDatosMigracion] = useState<MigrationData>({});
 
+    const [perfilesExistentes, setPerfilesExistentes] = useState({
+        artista: false,
+        publico: false,
+        discoteca: false
+    });
+
 
     // Initial load handled by effect below
 
@@ -88,9 +96,8 @@ export default function PaginaConfiguracion() {
         if (!nuevoRol) return;
         setMigrando(true);
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'}/api/usuarios/migrar-rol`, {
+            const res = await fetchApi('/api/usuarios/migrar-rol', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     usuarioId: session?.user?.id,
                     nuevoRol,
@@ -116,7 +123,7 @@ export default function PaginaConfiguracion() {
     const cargarBloqueados = useCallback(async () => {
         setCargandoBloqueados(true);
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'}/api/usuarios/bloqueados/${session?.user?.id}`);
+            const res = await fetchApi(`/api/usuarios/bloqueados/${session?.user?.id}`);
             if (res.ok) {
                 const data = await res.json();
                 setBloqueados(data);
@@ -128,17 +135,34 @@ export default function PaginaConfiguracion() {
         }
     }, [session?.user?.id]);
 
+    const cargarPerfil = useCallback(async () => {
+        if (!session?.user?.id) return;
+        try {
+            const res = await fetchApi(`/api/usuarios/perfil/${session.user.id}`);
+            if (res.ok) {
+                const data = await res.json();
+                setPerfilesExistentes({
+                    artista: !!data.perfilArtista,
+                    publico: !!data.perfilPublico,
+                    discoteca: !!data.perfilDiscoteca
+                });
+            }
+        } catch (error) {
+            console.error("Error cargando perfil:", error);
+        }
+    }, [session?.user?.id]);
+
     useEffect(() => {
         if (session?.user?.id) {
             cargarBloqueados();
+            cargarPerfil();
         }
-    }, [session, cargarBloqueados]);
+    }, [session?.user?.id, cargarBloqueados, cargarPerfil]);
 
     const desbloquearUsuario = async (bloqueadoId: string) => {
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'}/api/usuarios/desbloquear`, {
+            const res = await fetchApi('/api/usuarios/desbloquear', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     bloqueadorId: session?.user?.id,
                     bloqueadoId
@@ -160,9 +184,8 @@ export default function PaginaConfiguracion() {
     const deshabilitarCuenta = async () => {
         setCargando(true);
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'}/api/usuarios/deshabilitar`, {
+            const res = await fetchApi('/api/usuarios/deshabilitar', {
                 method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ usuarioId: session?.user?.id })
             });
 
@@ -183,9 +206,8 @@ export default function PaginaConfiguracion() {
     const eliminarCuenta = async () => {
         setCargando(true);
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'}/api/usuarios/eliminar`, {
+            const res = await fetchApi('/api/usuarios/eliminar', {
                 method: 'DELETE',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ usuarioId: session?.user?.id })
             });
 
@@ -198,6 +220,27 @@ export default function PaginaConfiguracion() {
         } catch (error) {
             console.error(error);
             toast.error("Error al eliminar cuenta");
+        } finally {
+            setCargando(false);
+        }
+    };
+
+    const eliminarPerfilAdmin = async (tipo: string) => {
+        setCargando(true);
+        try {
+            const res = await fetchApi(`/api/admin/usuarios/perfil/${tipo}`, {
+                method: 'DELETE'
+            });
+
+            if (res.ok) {
+                toast.success(`Perfil de ${tipo} eliminado. Reiniciando sesión...`);
+                setTimeout(() => signOut({ callbackUrl: '/home' }), 2000);
+            } else {
+                toast.error(`Error al eliminar perfil de ${tipo}`);
+            }
+        } catch (error) {
+            console.error(error);
+            toast.error(`Error al eliminar perfil de ${tipo}`);
         } finally {
             setCargando(false);
         }
@@ -306,7 +349,7 @@ export default function PaginaConfiguracion() {
                     </Card>
 
                     {/* Role Migration Section - Hidden for SuperAdmin */}
-                    {session?.user?.rol !== 'SUPERADMIN' && (
+                    {session?.user?.rol !== 'SUPER_ADMIN' && session?.user?.rol !== 'ADMIN' && (
                         <Card className="border-white/10 bg-black/40 backdrop-blur-xl">
                             <CardHeader>
                                 <CardTitle className="text-xl text-white flex items-center gap-2">
@@ -430,6 +473,142 @@ export default function PaginaConfiguracion() {
                         </Card>
                     )}
 
+                    {/* Admin Profile Management */}
+                    {(session?.user?.rol === 'SUPER_ADMIN' || session?.user?.rol === 'ADMIN') && (
+                        <Card className="border-white/10 bg-black/40 backdrop-blur-xl">
+                            <CardHeader>
+                                <CardTitle className="text-xl text-white flex items-center gap-2">
+                                    <Shield className="h-5 w-5 text-indigo-400" />
+                                    Gestión de Perfil de Prueba (Admin)
+                                </CardTitle>
+                                <CardDescription className="text-zinc-400">
+                                    Crea o elimina perfiles sin perder tus privilegios de administrador.
+                                </CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                {/* Artista */}
+                                <div className="flex items-center justify-between p-4 border border-zinc-800 rounded-lg bg-zinc-900/30">
+                                    <div>
+                                        <h4 className="text-white font-medium">Perfil de Artista</h4>
+                                        <p className="text-zinc-500 text-sm mt-1">
+                                            {perfilesExistentes.artista ? "Ya tienes un perfil de artista activo." : "Crea un perfil de artista para probar la plataforma."}
+                                        </p>
+                                    </div>
+                                    {perfilesExistentes.artista ? (
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <Button variant="destructive" className="bg-red-600 hover:bg-red-700">
+                                                    Eliminar Perfil
+                                                </Button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent className="bg-zinc-900 border-zinc-800 text-white">
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>¿Eliminar Perfil de Artista?</AlertDialogTitle>
+                                                    <AlertDialogDescription className="text-zinc-400">
+                                                        Esto eliminará todos los datos asociados al perfil de artista (eventos, redes, donaciones) pero mantendrá tu cuenta de Administrador intacta.
+                                                    </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel className="bg-transparent border-zinc-700 text-white hover:bg-zinc-800">Cancelar</AlertDialogCancel>
+                                                    <AlertDialogAction onClick={() => eliminarPerfilAdmin('artista')} className="bg-red-600 hover:bg-red-700 text-white">
+                                                        Sí, eliminar
+                                                    </AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
+                                    ) : (
+                                        <Button 
+                                            className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                                            onClick={() => window.location.href = '/artist-registration'}
+                                        >
+                                            Crear Perfil
+                                        </Button>
+                                    )}
+                                </div>
+
+                                {/* Discoteca */}
+                                <div className="flex items-center justify-between p-4 border border-zinc-800 rounded-lg bg-zinc-900/30">
+                                    <div>
+                                        <h4 className="text-white font-medium">Perfil de Discoteca</h4>
+                                        <p className="text-zinc-500 text-sm mt-1">
+                                            {perfilesExistentes.discoteca ? "Ya tienes un perfil de discoteca activo." : "Crea un perfil de discoteca para probar la plataforma."}
+                                        </p>
+                                    </div>
+                                    {perfilesExistentes.discoteca ? (
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <Button variant="destructive" className="bg-red-600 hover:bg-red-700">
+                                                    Eliminar Perfil
+                                                </Button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent className="bg-zinc-900 border-zinc-800 text-white">
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>¿Eliminar Perfil de Discoteca?</AlertDialogTitle>
+                                                    <AlertDialogDescription className="text-zinc-400">
+                                                        Esto eliminará todos los datos asociados al perfil de discoteca pero mantendrá tu cuenta de Administrador intacta.
+                                                    </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel className="bg-transparent border-zinc-700 text-white hover:bg-zinc-800">Cancelar</AlertDialogCancel>
+                                                    <AlertDialogAction onClick={() => eliminarPerfilAdmin('discoteca')} className="bg-red-600 hover:bg-red-700 text-white">
+                                                        Sí, eliminar
+                                                    </AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
+                                    ) : (
+                                        <Button 
+                                            className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                                            onClick={() => window.location.href = '/venue-registration'}
+                                        >
+                                            Crear Perfil
+                                        </Button>
+                                    )}
+                                </div>
+
+                                {/* Público */}
+                                <div className="flex items-center justify-between p-4 border border-zinc-800 rounded-lg bg-zinc-900/30">
+                                    <div>
+                                        <h4 className="text-white font-medium">Perfil de Público</h4>
+                                        <p className="text-zinc-500 text-sm mt-1">
+                                            {perfilesExistentes.publico ? "Ya tienes un perfil de público activo." : "Crea un perfil de público para probar la plataforma."}
+                                        </p>
+                                    </div>
+                                    {perfilesExistentes.publico ? (
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <Button variant="destructive" className="bg-red-600 hover:bg-red-700">
+                                                    Eliminar Perfil
+                                                </Button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent className="bg-zinc-900 border-zinc-800 text-white">
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>¿Eliminar Perfil de Público?</AlertDialogTitle>
+                                                    <AlertDialogDescription className="text-zinc-400">
+                                                        Esto eliminará todos los datos asociados al perfil de público pero mantendrá tu cuenta de Administrador intacta.
+                                                    </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel className="bg-transparent border-zinc-700 text-white hover:bg-zinc-800">Cancelar</AlertDialogCancel>
+                                                    <AlertDialogAction onClick={() => eliminarPerfilAdmin('publico')} className="bg-red-600 hover:bg-red-700 text-white">
+                                                        Sí, eliminar
+                                                    </AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
+                                    ) : (
+                                        <Button 
+                                            className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                                            onClick={() => window.location.href = '/public-registration'}
+                                        >
+                                            Crear Perfil
+                                        </Button>
+                                    )}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    )}
+
                     {/* Account Management Section */}
                     <Card className="border-white/10 bg-black/40 backdrop-blur-xl border-t-red-900/50">
                         <CardHeader>
@@ -473,7 +652,7 @@ export default function PaginaConfiguracion() {
                             </div>
 
                             {/* Delete Account - Hidden for SuperAdmin */}
-                            {session?.user?.rol !== 'SUPERADMIN' && (
+                            {session?.user?.rol !== 'SUPER_ADMIN' && (
                                 <div className="flex items-center justify-between p-4 border border-red-900/30 rounded-lg bg-red-900/10">
                                     <div>
                                         <h4 className="text-white font-medium">Eliminar Cuenta</h4>

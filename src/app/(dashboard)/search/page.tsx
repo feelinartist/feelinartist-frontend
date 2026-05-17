@@ -50,13 +50,13 @@ function SearchContent() {
         } finally {
             setCargando(false);
         }
-    }, [termino, session]);
+    }, [termino, session?.user?.id]);
 
     useEffect(() => {
         if (termino && session?.user?.id) {
             buscarArtistas();
         }
-    }, [termino, session, buscarArtistas]);
+    }, [termino, session?.user?.id, buscarArtistas]);
 
     return (
         <div className="relative z-10 max-w-5xl mx-auto">

@@ -29,7 +29,7 @@ export default function EventsPage() {
         } else if (status === "authenticated" && !esArtista) {
             router.push("/home");
         }
-    }, [status, session, router, esArtista]);
+    }, [status, router, esArtista]);
 
     if (status === "loading" || !session) {
         return <LoadingScreen />;

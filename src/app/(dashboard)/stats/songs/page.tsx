@@ -8,6 +8,7 @@ import { SongDetailsTable } from "@/components/stats/song-details-table";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Music } from "lucide-react";
 import { toast } from "sonner";
+import { fetchApi } from "@/lib/api";
 // useDebounce is defined locally below
 
 export default function GlobalSongsPage() {
@@ -48,14 +49,14 @@ export default function GlobalSongsPage() {
                 ordenarPor: sort
             });
 
-            const resProfile = await fetch(`/api/usuarios/perfil/${session?.user?.id}`);
+            const resProfile = await fetchApi(`/api/usuarios/perfil/${session?.user?.id}`);
             if (!resProfile.ok) throw new Error("Error al cargar perfil");
             const profile = await resProfile.json();
             const perfilArtistaId = profile.perfilArtista?.id;
 
             if (!perfilArtistaId) return;
 
-            const res = await fetch(`/api/estadisticas/artista/${perfilArtistaId}/canciones?${params}`);
+            const res = await fetchApi(`/api/estadisticas/artista/${perfilArtistaId}/canciones?${params}`);
             if (!res.ok) throw new Error("Error al cargar canciones");
 
             const result = await res.json();

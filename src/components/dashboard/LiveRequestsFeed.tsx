@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Check, X, Music2, Loader2, Users } from "lucide-react";
 import { toast } from "sonner";
 import { io } from "socket.io-client";
+import { fetchApi } from "@/lib/api";
 
 interface Request {
     id: string;
@@ -35,7 +36,7 @@ export function LiveRequestsFeed({ eventoId }: { eventoId: string }) {
 
     const fetchRequests = useCallback(async () => {
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/eventos/${eventoId}/pedidos`);
+            const res = await fetchApi(`/api/eventos/${eventoId}/pedidos`);
             if (res.ok) {
                 const data = await res.json();
                 setRequests(data);
@@ -111,7 +112,7 @@ export function LiveRequestsFeed({ eventoId }: { eventoId: string }) {
         // Execute sequentially or Promise.all (Looping for now as volume is usually low)
         for (const id of requestIds) {
             try {
-                const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/pedidos/${id}/estado`, {
+                const res = await fetchApi(`/api/pedidos/${id}/estado`, {
                     method: "PATCH",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ estado })

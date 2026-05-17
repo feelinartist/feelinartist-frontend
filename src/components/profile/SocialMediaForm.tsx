@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
+import { fetchApi } from "@/lib/api";
 
 interface SocialMediaItem {
     id: string;
@@ -86,7 +87,7 @@ export function SocialMediaForm({ redesSociales, usuarioId, onSave, onLoadingCha
 
     const fetchAvailableNetworks = async () => {
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'}/api/config/redes-sociales`);
+            const res = await fetchApi('/api/config/redes-sociales');
             if (res.ok) {
                 const data = await res.json();
                 setAvailableNetworks(data);
@@ -162,9 +163,8 @@ export function SocialMediaForm({ redesSociales, usuarioId, onSave, onLoadingCha
                     nombreUsuario: entry.nombreUsuario
                 }));
 
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'}/api/usuarios/perfil`, {
+            const response = await fetchApi('/api/usuarios/perfil', {
                 method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     usuarioId,
                     redesSociales: socialMediaArray

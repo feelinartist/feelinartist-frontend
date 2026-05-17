@@ -1,5 +1,7 @@
 "use client";
 
+import { fetchApi } from "@/lib/api";
+
 import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -50,17 +52,13 @@ export default function ContenidoSeleccionRol() {
 
         try {
             // Call backend to update role
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'}/api/usuarios/rol`, {
+            const response = await fetchApi('/api/usuarios/rol', {
                 method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${session?.user?.email}` // Temporary auth
-                },
                 body: JSON.stringify({ correo: session?.user?.email, rol })
             });
 
             if (response.ok) {
-                router.push('/home');
+                window.location.replace('/home');
             } else {
                 console.error('Error al actualizar rol');
             }

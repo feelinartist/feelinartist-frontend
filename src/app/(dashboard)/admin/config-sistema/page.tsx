@@ -111,7 +111,7 @@ export default function ConfigSistemaPage() {
                 cargarConfiguraciones();
             }
         }
-    }, [status, session, router, cargarConfiguraciones]);
+    }, [status, session?.user?.rol, router, cargarConfiguraciones]);
 
     const inferCategory = (clave: string): CategoriaConfig => {
         const key = clave.toUpperCase();

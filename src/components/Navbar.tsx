@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
@@ -23,39 +23,6 @@ export default function Navbar() {
     const pathname = usePathname();
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isSearchOpen, setIsSearchOpen] = useState(false);
-
-    // Sync session name with backend on mount
-    useEffect(() => {
-        const syncSessionName = async () => {
-            if (session?.user?.id) {
-                try {
-                    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001';
-                    const response = await fetch(`${backendUrl}/api/usuarios/perfil/${session.user.id}`);
-                    if (response.ok) {
-                        const dbUser = await response.json();
-                        const updates: { name?: string; image?: string } = {};
-
-                        if (dbUser.nombre && dbUser.nombre !== session.user.name) {
-                            updates.name = dbUser.nombre;
-                        }
-                        if (dbUser.imagen && dbUser.imagen !== session.user.image) {
-                            updates.image = dbUser.imagen;
-                        }
-
-                        if (Object.keys(updates).length > 0) {
-                            console.log("Syncing session with DB updates:", updates);
-                            await update(updates);
-                        }
-                    }
-                } catch (error) {
-                    console.error("Error syncing session name:", error);
-                }
-            }
-        };
-
-        syncSessionName();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [session?.user?.id]); // Only run when user ID changes (login/load)
 
     const isRestrictedFlow = pathname === '/role-selection' ||
         pathname === '/artist-registration' ||
@@ -149,7 +116,7 @@ export default function Navbar() {
                                                     <span>Inicio</span>
                                                 </DropdownMenuItem>
                                             </Link>
-                                            {session?.user?.rol === 'ARTISTA' && (
+                                            {(session?.user?.rol === 'ARTISTA' || session?.user?.rol === 'SUPER_ADMIN' || session?.user?.rol === 'ADMIN') && (
                                                 <>
                                                     <Link href="/events">
                                                         <DropdownMenuItem className="cursor-pointer focus:bg-white/10 focus:text-white text-white">
@@ -232,7 +199,7 @@ export default function Navbar() {
                             <Link href="/home" onClick={() => setIsMenuOpen(false)} className="text-xl font-medium text-zinc-300 hover:text-white transition-colors">
                                 Inicio
                             </Link>
-                            {session?.user?.rol === 'ARTISTA' && (
+                            {(session?.user?.rol === 'ARTISTA' || session?.user?.rol === 'SUPER_ADMIN' || session?.user?.rol === 'ADMIN') && (
                                 <>
                                     <Link href="/events" onClick={() => setIsMenuOpen(false)} className="text-xl font-medium text-zinc-300 hover:text-white transition-colors">
                                         Eventos

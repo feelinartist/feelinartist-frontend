@@ -7,6 +7,7 @@ import { Search, Loader2, Sparkles } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { ArtistCard } from "./ArtistCard";
 import { Button } from "@/components/ui/button";
+import { fetchApi } from "@/lib/api";
 
 interface Artist {
     id: string;
@@ -50,7 +51,7 @@ export function ArtistDiscovery() {
             if (paisId && paisId !== "all") params.append("paisId", paisId);
             params.append("usuarioSolicitanteId", session.user.id);
 
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'}/api/usuarios/buscar?${params.toString()}`);
+            const res = await fetchApi(`/api/usuarios/buscar?${params.toString()}`);
             if (res.ok) {
                 const data = await res.json();
                 setArtistas(data);

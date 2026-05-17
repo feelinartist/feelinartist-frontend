@@ -4,6 +4,7 @@ const nextConfig = {
     images: {
         remotePatterns: [],
     },
+
     async rewrites() {
         return [
             {

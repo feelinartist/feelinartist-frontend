@@ -71,7 +71,7 @@ export default function EventStatsPage() {
         if (session?.user && eventoId) {
             cargarEstadisticas();
         }
-    }, [session, eventoId, cargarEstadisticas]);
+    }, [session?.user?.id, eventoId, cargarEstadisticas]);
 
     if (cargando) return <LoadingScreen />;
     if (!estadisticas) return null;

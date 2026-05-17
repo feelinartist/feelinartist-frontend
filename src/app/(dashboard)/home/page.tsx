@@ -1,5 +1,7 @@
 "use client";
 
+import { fetchApi } from "@/lib/api";
+
 import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -53,18 +55,15 @@ export default function PaginaPanelControl() {
         localStorage.setItem('checklist-dismissed', 'false');
     };
 
-    useEffect(() => {
-        if (status === "unauthenticated") {
-            router.push("/login");
-        } else if (status === "authenticated" && !session?.user?.rol) {
-            router.push("/role-selection");
-        }
-    }, [status, session?.user?.rol, router]);
+    const esAdmin = session?.user?.rol === "SUPER_ADMIN" || session?.user?.rol === "ADMIN";
+
+    const sessionUserId = session?.user?.id;
+    const sessionUserRol = session?.user?.rol;
 
     const cargarPerfilArtista = useCallback(async (mounted: boolean) => {
+        if (!sessionUserId) return;
         try {
-            const url = `${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001"}/api/usuarios/perfil/${session?.user?.id}`;
-            const res = await fetch(url);
+            const res = await fetchApi(`/api/usuarios/perfil/${sessionUserId}`);
 
             if (res.ok) {
                 const data = await res.json();
@@ -75,7 +74,7 @@ export default function PaginaPanelControl() {
 
                 // Check for active event (only once per session)
                 if (!sessionStorage.getItem('eventRedirectChecked')) {
-                    const resEvent = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001"}/api/eventos/activo/${data.perfilArtista?.id}`);
+                    const resEvent = await fetchApi(`/api/eventos/activo/${data.perfilArtista?.id}`);
                     if (resEvent.ok) {
                         const eventData = await resEvent.json();
                         if (eventData) {
@@ -89,12 +88,12 @@ export default function PaginaPanelControl() {
                 }
             } else {
                 const errorText = await res.text();
-                console.error("Error response:", errorText);
+                console.warn("Error response from profile fetch:", errorText);
             }
         } catch (error) {
-            console.error("Error cargando perfil de artista:", error);
+            console.warn("Error cargando perfil de artista:", error);
         }
-    }, [session, router]); // Dependency changed from session?.user?.id to session to satisfy compiler
+    }, [sessionUserId, router]);
 
     useEffect(() => {
         let mounted = true;
@@ -137,7 +136,7 @@ export default function PaginaPanelControl() {
             console.log("Perfil incompleto detectado, reseteando reconocimiento...");
             const resetAcknowledgment = async () => {
                 try {
-                    await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001"}/api/usuarios/marcar-perfil-completado`, {
+                    await fetchApi('/api/usuarios/marcar-perfil-completado', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({

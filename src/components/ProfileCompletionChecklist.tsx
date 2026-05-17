@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
+import { fetchApi } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle2, Circle, Image as ImageIcon, Share2, DollarSign, User, X, Check } from "lucide-react";
 import { motion } from "framer-motion";
@@ -36,9 +37,8 @@ export function ProfileCompletionChecklist({ perfilArtista, onDismiss }: Profile
             const session = await fetch('/api/auth/session').then(res => res.json());
             if (!session?.user?.id) return;
 
-            await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001"}/api/usuarios/marcar-perfil-completado`, {
+            await fetchApi('/api/usuarios/marcar-perfil-completado', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     usuarioId: session.user.id,
                     perfilCompletadoReconocido: false
@@ -111,9 +111,8 @@ export function ProfileCompletionChecklist({ perfilArtista, onDismiss }: Profile
             console.log('Marking profile as complete for user:', session.user.id);
 
             // Mark as acknowledged in backend
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001"}/api/usuarios/marcar-perfil-completado`, {
+            const response = await fetchApi('/api/usuarios/marcar-perfil-completado', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ usuarioId: session.user.id })
             });
 

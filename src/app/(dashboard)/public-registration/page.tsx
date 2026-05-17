@@ -1,5 +1,7 @@
 "use client";
 
+import { fetchApi } from "@/lib/api";
+
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
@@ -43,7 +45,7 @@ export default function PaginaRegistroPublico() {
             setFormData(prev => ({ ...prev, nombre: session.user.name || "" }));
         }
         const rolUsuario = session?.user?.rol;
-        if (rolUsuario) {
+        if (rolUsuario && rolUsuario !== 'SUPER_ADMIN' && rolUsuario !== 'ADMIN') {
             router.push('/home');
         }
     }, [session, router, status, formData.nombre]);
@@ -81,19 +83,24 @@ export default function PaginaRegistroPublico() {
                 zonaHoraria: formData.zonaHoraria,
             };
 
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'}/api/usuarios/rol`, {
+            const response = await fetchApi('/api/usuarios/rol', {
                 method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${session?.user?.email}`
-                },
                 body: JSON.stringify(payload)
             });
 
             if (response.ok) {
+                const data = await response.json();
                 toast.success("¡Registro completado con éxito!");
-                if (update) await update({ rol: 'PUBLICO', name: formData.nombre });
-                router.push('/home');
+                
+                const esAdmin = session?.user?.rol === 'SUPER_ADMIN' || session?.user?.rol === 'ADMIN';
+                if (update) {
+                    await update({
+                        rol: esAdmin ? session.user.rol : (data.rol?.nombre || 'PUBLICO'),
+                        name: formData.nombre,
+                        accessToken: data.token
+                    });
+                }
+                window.location.replace(esAdmin ? '/settings' : '/home');
             } else {
                 console.error('Error al registrar perfil público');
                 toast.error("Error al registrar perfil público. Inténtalo de nuevo.");
@@ -116,7 +123,7 @@ export default function PaginaRegistroPublico() {
 
             {/* Header - Increased Top Padding & Centered */}
             <div className="z-10 w-full max-w-2xl px-6 pt-32 pb-8 flex items-center justify-between">
-                <BackButton href="/role-selection" />
+                <BackButton href={session?.user?.rol === 'SUPER_ADMIN' || session?.user?.rol === 'ADMIN' ? "/settings" : "/role-selection"} />
                 <h1 className="text-xl font-semibold tracking-tight">Registro de Público</h1>
                 <div className="w-6" /> {/* Spacer */}
             </div>

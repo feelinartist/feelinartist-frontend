@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Upload, X, Image as ImageIcon, Save } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
+import { fetchApi } from "@/lib/api";
 
 interface GalleryFormProps {
     galeria: { urlImagen: string }[];
@@ -128,9 +129,8 @@ export function GalleryForm({ galeria, usuarioId, onSave, onLoadingChange }: Gal
             if (newBase64Images.length > 0) {
                 const loadingToast = toast.loading(`Subiendo ${newBase64Images.length} imagen(es)...`);
 
-                const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'}/api/imagenes/galeria`, {
+                const response = await fetchApi('/api/imagenes/galeria', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         usuarioId,
                         images: newBase64Images
@@ -147,9 +147,8 @@ export function GalleryForm({ galeria, usuarioId, onSave, onLoadingChange }: Gal
             }
 
             // Save to profile
-            const profileResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'}/api/usuarios/perfil`, {
+            const profileResponse = await fetchApi('/api/usuarios/perfil', {
                 method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     usuarioId,
                     galeria: uploadedUrls.map(url => ({ urlImagen: url }))
@@ -205,7 +204,7 @@ export function GalleryForm({ galeria, usuarioId, onSave, onLoadingChange }: Gal
                 {images.length > 0 ? (
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                         {images.map((url, index) => (
-                            <div key={index} className="relative group aspect-square rounded-lg overflow-hidden bg-zinc-900">
+                            <div key={url} className="relative group aspect-square rounded-lg overflow-hidden bg-zinc-900">
                                 <Image
                                     src={url}
                                     alt={`Imagen ${index + 1}`}

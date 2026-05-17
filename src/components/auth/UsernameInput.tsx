@@ -3,6 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Loader2, CheckCircle, XCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { fetchApi } from "@/lib/api";
 
 interface UsernameInputProps {
     value: string;
@@ -62,9 +63,8 @@ export function UsernameInput({
 
         setVerifying(true);
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'}/api/usuarios/verificar-nombre-usuario`, {
+            const response = await fetchApi('/api/usuarios/verificar-nombre-usuario', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ nombreUsuario: value })
             });
 

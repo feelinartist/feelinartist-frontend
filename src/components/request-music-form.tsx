@@ -74,7 +74,16 @@ export function RequestMusicForm({ eventoId, artistName, artistProfile }: Reques
                     const data = await response.json();
 
                     if (data.results) {
-                        const mappedTracks: Track[] = data.results.map((item: any) => {
+                        interface ITunesSong {
+                            trackId: number;
+                            trackName: string;
+                            artistName: string;
+                            artworkUrl100: string;
+                            primaryGenreName?: string;
+                            previewUrl?: string;
+                        }
+
+                        const mappedTracks: Track[] = data.results.map((item: ITunesSong) => {
                             // High Res Image Trick: Replace 100x100 with 600x600 for better quality
                             const highResImage = item.artworkUrl100?.replace('100x100', '600x600');
 

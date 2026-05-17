@@ -7,6 +7,7 @@ import { AnimatedBackground } from "@/components/animated-background";
 import { LiveRequestsFeed } from "@/components/dashboard/LiveRequestsFeed";
 import { LoadingScreen } from "@/components/ui/loading-screen";
 import { BackButton } from "@/components/ui/back-button";
+import { fetchApi } from "@/lib/api";
 import { toast } from "sonner";
 
 interface ActiveEvent {
@@ -23,10 +24,10 @@ export default function LiveRequestsPage() {
 
     const fetchActiveEvent = useCallback(async () => {
         try {
-            const artistaId = session?.user?.perfilArtista?.id || session?.user?.id;
+            const artistaId = session?.user?.id;
             if (!artistaId) return;
 
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:3001'}/api/eventos/activo/${artistaId}`);
+            const res = await fetchApi(`/api/eventos/activo/${artistaId}`);
             if (res.ok) {
                 const data = await res.json();
                 if (data) {
@@ -45,7 +46,7 @@ export default function LiveRequestsPage() {
         } finally {
             setLoading(false);
         }
-    }, [session, router]);
+    }, [session?.user?.id, router]);
 
     useEffect(() => {
         if (status === "unauthenticated") {
@@ -57,7 +58,7 @@ export default function LiveRequestsPage() {
             }
             fetchActiveEvent();
         }
-    }, [status, session, router, fetchActiveEvent]);
+    }, [status, session?.user?.rol, router, fetchActiveEvent]);
 
     if (status === "loading" || loading) {
         return <LoadingScreen />;
