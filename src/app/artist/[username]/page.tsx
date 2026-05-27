@@ -13,7 +13,7 @@ import { LoadingScreen } from "@/components/ui/loading-screen";
 import { BackButton } from "@/components/ui/back-button";
 import Navbar from "@/components/Navbar";
 import {
-    MapPin, Music, Instagram, Twitter, Facebook, Youtube,
+    MapPin, Music, Camera, MessageSquare, Users, PlayCircle,
     Globe, Calendar, ExternalLink, QrCode, Phone,
     Ticket, Building2, Wallet, Share2, X, ZoomIn, Search
 } from "lucide-react";
@@ -260,10 +260,10 @@ export default function PaginaPerfilArtistaPublico() {
                                                 </div>
                                             );
                                             const iconType = (dbIcon || name).toLowerCase();
-                                            const Icon = iconType.includes('instagram') ? Instagram :
-                                                (iconType.includes('twitter') || iconType.includes('x')) ? Twitter :
-                                                    iconType.includes('facebook') ? Facebook :
-                                                        iconType.includes('youtube') ? Youtube :
+                                            const Icon = iconType.includes('instagram') ? Camera :
+                                                (iconType.includes('twitter') || iconType.includes('x')) ? MessageSquare :
+                                                    iconType.includes('facebook') ? Users :
+                                                        iconType.includes('youtube') ? PlayCircle :
                                                             iconType.includes('whatsapp') ? Phone : Globe;
                                             return <Icon className="h-4 w-4" />;
                                         };

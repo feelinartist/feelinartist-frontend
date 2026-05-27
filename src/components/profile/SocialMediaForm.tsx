@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
-    Loader2, Save, Instagram, Twitter, Facebook,
-    Youtube, Globe, MessageSquare, Music
+    Loader2, Save, Camera, MessageSquare, Users,
+    PlayCircle, Globe, Music
 } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
@@ -140,10 +140,10 @@ export function SocialMediaForm({ redesSociales, usuarioId, onSave, onLoadingCha
         }
 
         const name = (dbIcon || networkName).toLowerCase();
-        if (name.includes('instagram')) return <Instagram className="h-4 w-4 text-pink-500" />;
-        if (name.includes('twitter') || name.includes('x')) return <Twitter className="h-4 w-4 text-sky-400" />;
-        if (name.includes('facebook')) return <Facebook className="h-4 w-4 text-blue-600" />;
-        if (name.includes('youtube')) return <Youtube className="h-4 w-4 text-red-600" />;
+        if (name.includes('instagram')) return <Camera className="h-4 w-4 text-pink-500" />;
+        if (name.includes('twitter') || name.includes('x')) return <MessageSquare className="h-4 w-4 text-sky-400" />;
+        if (name.includes('facebook')) return <Users className="h-4 w-4 text-blue-600" />;
+        if (name.includes('youtube')) return <PlayCircle className="h-4 w-4 text-red-600" />;
         if (name.includes('whatsapp')) return <MessageSquare className="h-4 w-4 text-green-500" />;
         if (name.includes('soundcloud')) return <Music className="h-4 w-4 text-green-400" />;
         if (name.includes('kick')) return <Globe className="h-4 w-4 text-green-400" />;

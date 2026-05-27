@@ -114,6 +114,12 @@ export default function PaginaPanelControl() {
         return () => { mounted = false; };
     }, [esArtista, session?.user?.id, cargarPerfilArtista]);
 
+    useEffect(() => {
+        if (status === "unauthenticated") {
+            router.push("/login");
+        }
+    }, [status, router]);
+
     const cargandoPerfil = esArtista && status === "authenticated" && !perfilArtista;
 
 
@@ -165,7 +171,7 @@ export default function PaginaPanelControl() {
         return <LoadingScreen />;
     }
 
-    if (!session || !session.user?.rol) {
+    if (status === "unauthenticated" || !session || !session.user?.rol) {
         return <LoadingScreen />;
     }
 

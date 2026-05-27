@@ -1,4 +1,4 @@
-import { getSession } from "next-auth/react";
+import { getSession, signOut } from "next-auth/react";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:3001";
 
@@ -18,7 +18,7 @@ export async function fetchApi(
 
     const url = path.startsWith("http") ? path : `${BACKEND_URL}${path}`;
 
-    return fetch(url, {
+    const response = await fetch(url, {
         ...options,
         headers: {
             "Content-Type": "application/json",
@@ -26,4 +26,10 @@ export async function fetchApi(
             ...(options.headers || {}),
         },
     });
+
+    if ((response.status === 401 || response.status === 403) && typeof window !== "undefined") {
+        void signOut({ callbackUrl: "/login" });
+    }
+
+    return response;
 }

@@ -26,11 +26,10 @@ import {
     CreditCard,
     Globe,
     Loader2,
-    Instagram,
-    Twitter,
-    Facebook,
-    Youtube,
+    Camera,
     MessageSquare,
+    Users,
+    PlayCircle,
     Music
 } from "lucide-react";
 
@@ -227,14 +226,14 @@ export default function PaginaConfiguracionAdmin() {
 
     const getSocialIcon = (item: RedSocial | MetodoDonacion) => {
         if (item.icono?.startsWith('http')) {
-            return <div className="relative h-5 w-5"><Image src={item.icono} alt={item.nombre} fill className="object-contain filter brightness-110" unoptimized /></div>;
+            return <div className="relative h-5 w-5"><Image src={item.icono} alt={item.nombre} fill sizes="20px" className="object-contain filter brightness-110" unoptimized /></div>;
         }
 
         const type = (item.icono || item.nombre || "").toLowerCase();
-        if (type.includes('instagram')) return <Instagram className="h-5 w-5" />;
-        if (type.includes('twitter') || type.includes('x')) return <Twitter className="h-5 w-5" />;
-        if (type.includes('facebook')) return <Facebook className="h-5 w-5" />;
-        if (type.includes('youtube')) return <Youtube className="h-5 w-5" />;
+        if (type.includes('instagram')) return <Camera className="h-5 w-5" />;
+        if (type.includes('twitter') || type.includes('x')) return <MessageSquare className="h-5 w-5" />;
+        if (type.includes('facebook')) return <Users className="h-5 w-5" />;
+        if (type.includes('youtube')) return <PlayCircle className="h-5 w-5" />;
         if (type.includes('tiktok')) return <Music className="h-5 w-5" />;
         if (type.includes('whatsapp')) return <MessageSquare className="h-5 w-5" />;
         if (type.includes('soundcloud')) return <Music className="h-5 w-5" />;
